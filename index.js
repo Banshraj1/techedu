@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config({});
-const port = process.env.port;
+const port = process.env.PORT;
 import app from "./src/App.js";
 import { connectdb } from "./src/db/connectdb.js";
 
@@ -15,6 +15,6 @@ connectdb()
   })
   .catch((error) => {
     console.log("db connection error", error);
-    throw new error("DB connection error")
+    throw new error("DB connection error");
     // app.on("error")
   });

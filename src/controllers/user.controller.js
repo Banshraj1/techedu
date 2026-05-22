@@ -86,9 +86,8 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordCorrect) {
     throw new ApiError(402, "Invalid credentials...");
   }
-  console.log("here");
   const accessToken = await loggedinUser.generateAcessToken;
-  console.log(accessToken);
+  // console.log(accessToken);
 
   if (!accessToken) {
     throw new ApiError(500, "AccessToken generation Failed");
@@ -109,7 +108,6 @@ const loginUser = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      maxAge: 24 * 60 * 60 *7,
     })
     .json(new ApiResponse(200, response, "logged in successfull"));
 });

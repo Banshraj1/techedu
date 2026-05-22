@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config({});
+import {Playlist} from "./playlist.model.js"
 // import t
 // email ,phone no, name,password,DOB,wishlist,playlist,history
 
@@ -13,7 +14,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     email: {
-      type: email,
+      type: String,
       index: true,
       required: true,
     },
@@ -21,10 +22,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    DOB: {
-      type: Date,
-      required: true,
-    },
+    //DOB: {
+    //  type: Date,
+    //  required: true,
+    //},
     password: {
       type: String,
       required: true,
@@ -35,6 +36,11 @@ const userSchema = new mongoose.Schema(
       ref: Playlist,
     },
     history: {
+      // to make sure user want to store his history
+      type: Boolean,
+      default: true,
+    },
+    watchHistory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Playlist,
     },
@@ -49,7 +55,7 @@ userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = bcrypt.hash(this.password, 10);
   }
-  return next();
+  return next;
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {

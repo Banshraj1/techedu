@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, registerUser } from "../controllers/user.controller.js";
+import { deleteUser, loginUser, logoutUser, registerUser } from "../controllers/user.controller.js";
 
 const router = Router();
 // console.log(registerUser);
@@ -11,5 +11,6 @@ const router = Router();
 
 router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
-
+router.route("/logout").post(logoutUser)
+router.route("/delete").post(deleteUser)
 export { router };

@@ -6,6 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../model/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { trusted } from "mongoose";
+import jwt from "jsonwebtoken";
 
 /*
 is file me vo controller rahega jo user pr perform hoga jaise update details like password login register history update ,playlist update, and create,token generation 
@@ -63,12 +64,12 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   // const result= response.body
   // console.log(response.body);
+  console.log("User registered successfully");
 
   return res
     .status(200)
     .json(new ApiResponse(200, response, "user created successfully"));
 });
-//upar tk sb thik hai
 
 const loginUser = asyncHandler(async (req, res) => {
   //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
@@ -86,7 +87,7 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordCorrect) {
     throw new ApiError(402, "Invalid credentials...");
   }
-  const accessToken = await loggedinUser.generateAcessToken;
+  const accessToken = await loggedinUser.generateAcessToken();
   // console.log(accessToken);
 
   if (!accessToken) {
@@ -102,6 +103,7 @@ const loginUser = asyncHandler(async (req, res) => {
   // }
 
   const response = await User.findById(loggedinUser._id).select("-password");
+  console.log("log in successfull");
 
   return res
     .status(200)
@@ -112,4 +114,85 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, response, "logged in successfull"));
 });
 
-export { registerUser, loginUser };
+const logoutUser = asyncHandler(async (req, res) => {
+  const token = req.cookies.accessToken;
+  // console.log(token);
+  const SECRET_KEY = process.env.ACCESSTOKENSECRET;
+  const isVerified = jwt.verify(token, SECRET_KEY);
+
+  // console.log(isVerified);
+
+  if (!isVerified) {
+    throw new ApiError(404, "bad request");
+  }
+
+  const response = await User.findOne({ email: isVerified.email }).select(
+    "-password",
+  );
+  console.log("log out successfull");
+
+  return res
+    .status(200)
+    .cookie("accessToken", "", {
+      httpOnly: true,
+      secure: true,
+    })
+    .json(new ApiResponse(200, response, "logged out successfull"));
+});
+
+
+const deleteUser = asyncHandler(async (req, res) => {
+  //get token verify get email then search for user in db and delete that ...
+
+  const token = req.cookies.accessToken;
+  // console.log(token);
+  const SECRET_KEY = process.env.ACCESSTOKENSECRET;
+  let { email, password } = req.body;
+  if (!password) {
+    throw new ApiError(400, "Password is required to delete user...");
+  }
+
+  // console.log(email,password,SECRET_KEY);
+
+  // console.log(isVerified);
+  if (!email) {
+    const isVerified = await jwt.verify(token, SECRET_KEY);
+    if (!isVerified) {
+      throw new ApiError(
+        404,
+        "bad request.:: either email or sign in is required to delete user...",
+      );
+    }
+    email = isVerified.email;
+  }
+  const loggedinUser = await User.findOne({ email });
+  if (!loggedinUser) {
+    throw new ApiError(401, "User not found...");
+  }
+  const isPasswordCorrect = await loggedinUser.isPasswordCorrect(password);
+  if (!isPasswordCorrect) {
+    throw new ApiError(402, "Invalid credentials...");
+  }
+
+  const response = await User.deleteOne({ email });
+  if (response.deletedCount == 0) {
+    throw new ApiError(500, "User deletion failed...");
+  }
+  // console.log(response);
+
+  if (response.deletedCount == 0) {
+    throw new ApiError(500, "User deletion failed...");
+  }
+
+  return res
+    .status(200)
+    .cookie("accessToken", "", {
+      httpOnly: true,
+      secure: true,
+    })
+    .json(new ApiResponse(200, response, "User deleted successfully"));
+});
+
+//upar tk sb thik hai
+
+export { registerUser, loginUser, logoutUser, deleteUser };

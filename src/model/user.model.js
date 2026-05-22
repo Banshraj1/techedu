@@ -3,8 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config({});
-import {Playlist} from "./playlist.model.js"
-// import t
+import { Playlist } from "./playlist.model.js";
+
 // email ,phone no, name,password,DOB,wishlist,playlist,history
 
 const userSchema = new mongoose.Schema(
@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema(
 );
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
   }
   return next;
 });
@@ -63,7 +63,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 };
 
 userSchema.methods.generateAcessToken = async function () {
-  return jwt.sign(
+  return await jwt.sign(
     {
       // username:this.username ,
       email: this.email,
@@ -78,5 +78,15 @@ userSchema.methods.generateAcessToken = async function () {
       console.log(token);
     },
   );
+
+  // return accessToken;
 };
+
+// this method will give more control
+// using this we can REVOKE TOKEN, BLOCK USER and MANAGE SESSIONS
+
+userSchema.methods.saveAccessToken = async function (token) {
+  return (this.accessToken = token);
+};
+
 export const User = mongoose.model("User", userSchema);

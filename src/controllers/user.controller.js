@@ -26,27 +26,35 @@ const registerUser = asyncHandler(async (req, res) => {
   // console.log(req);
 
   //    console.log(req.body);
-  const { username, email, phone, password } = req.body;
 
-  // console.log(username, email, phone, password);
-  if ([username, email, phone, password].some((value) => !value?.trim())) {
-    // console.log("all fields are required");
-    throw new ApiError(404, "All fields are required");
-  }
+  const { username, email, phone = "1234567890", password } = req.body;
+
+  // ye wala block problem create kr rha hai
+
+  // if ([username, email, phone, password].some((value) => !value?.trim())) {
+  //   console.log("all fields are required");
+  //   throw new ApiError(404, "All fields are required");
+  // }
+  console.log(username, email, phone, password);
   // .select("-password")
   const alreadyRegisteredUser = await User.findOne({ email: email }).select(
     "-password",
   );
 
-  //   console.log(alreadyRegisteredUser);
-  //   console.log("email=",alreadyRegisteredUser.email);
+  // console.log(alreadyRegisteredUser);
+  // console.log("email=",alreadyRegisteredUser.email);
 
   if (alreadyRegisteredUser != null) {
+    console.log("User with this email already registered");
     throw new ApiError(
       400,
       "User with this email already registered",
       alreadyRegisteredUser,
     );
+    //   return res.status(409).json({
+    //   success: false,
+    //   message: "User with this email already exists",
+    // });
   }
   const newUser = await User.create({
     username: username,
@@ -55,7 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password: password,
   });
 
-  // console.log(newUser);
+  console.log(newUser);
 
   const response = await User.findById(newUser._id).select("-password");
 
@@ -74,6 +82,7 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
   const { email, password } = req.body;
+
   if ([email, password].some((value) => !value?.trim())) {
     throw new ApiError(404, "All fields are required");
   }
@@ -84,7 +93,8 @@ const loginUser = asyncHandler(async (req, res) => {
   // console.log(loggedinUser);
 
   const isPasswordCorrect = await loggedinUser.isPasswordCorrect(password);
-  if (!isPasswordCorrect) {
+
+  if (isPasswordCorrect === null) {
     throw new ApiError(402, "Invalid credentials...");
   }
   const accessToken = await loggedinUser.generateAcessToken();
@@ -93,6 +103,7 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!accessToken) {
     throw new ApiError(500, "AccessToken generation Failed");
   }
+
   // below four lines are not required
   // this will give more control
   // using this we can REVOKE TOKEN, BLOCK USER and MANAGE SESSIONS
@@ -140,7 +151,6 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, response, "logged out successfull"));
 });
 
-
 const deleteUser = asyncHandler(async (req, res) => {
   //get token verify get email then search for user in db and delete that ...
 
@@ -166,7 +176,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     email = isVerified.email;
   }
   const loggedinUser = await User.findOne({ email });
-  if (!loggedinUser) {
+  if (loggedinUser === null) {
     throw new ApiError(401, "User not found...");
   }
   const isPasswordCorrect = await loggedinUser.isPasswordCorrect(password);

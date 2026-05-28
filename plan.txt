@@ -1,0 +1,20 @@
+Too sabse pahle mujhe ek hotstar jaise website banana hai jiske andar ek user registeration karega and then user will watch videos and can comment on videos and like or dislike also
+
+registration 
+    email ,phone no, name,password,DOB
+
+user
+    email ,phone no, name,password,DOB,wishlist,playlist,history
+
+video
+    link from aws,description,likes,dislikes,comments,uploaded at
+
+playlist
+    it will be an array in which user will store some videos wich he can visit later or share someone it is same like wishlist 
+
+history 
+    it is subset of playlist and an array of programs watched 
+
+wishlist
+    it is subset of playlist and an array of programs
+

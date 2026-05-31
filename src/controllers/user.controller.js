@@ -1,10 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { asyncHandler } from "../utils/AsyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { User } from "../model/user.model.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
 import { trusted } from "mongoose";
 import jwt from "jsonwebtoken";
 
@@ -128,15 +126,13 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
   const token = req.cookies.accessToken;
   // console.log(token);
+
   const SECRET_KEY = process.env.ACCESSTOKENSECRET;
   const isVerified = jwt.verify(token, SECRET_KEY);
-
   // console.log(isVerified);
-
   if (!isVerified) {
     throw new ApiError(404, "bad request");
   }
-
   const response = await User.findOne({ email: isVerified.email }).select(
     "-password",
   );
@@ -188,6 +184,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   if (response.deletedCount == 0) {
     throw new ApiError(500, "User deletion failed...");
   }
+
   // console.log(response);
 
   if (response.deletedCount == 0) {

@@ -22,7 +22,6 @@ const uploadOnCloudinary = async (path) => {
     });
     console.log("File uploaded successfully");
     return response;
-    
   } catch (error) {
     console.log("Error in uploading file", error);
     throw new ApiError(500, "Error in file uploading", error);

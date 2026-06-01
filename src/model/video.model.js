@@ -1,36 +1,43 @@
 import mongoose from "mongoose";
+import { Comment } from "./comment.model.js";
+import { User } from "./user.model.js";
 // link from aws,description,likes,dislikes,comments,uploaded at
 const videoSchema = new mongoose.Schema(
   {
-    link: {
+    url: {
       type: String,
       required: true,
     },
     thumbnail: {
-      type: string,
+      type: String,
       required: true,
     },
     duration: {
       // it will be in second
-      type: number,
+      type: Number,
       required: true,
     },
     owner: {
-      type: string,
-      required: true,
+      // TODO 💦❤️
+      // ye chal nhi rha abhi ke liye
+      type: mongoose.Schema.Types.ObjectId,
+      ref: User,
+      // type: {},
+      // required: true,
     },
     isPublished: {
       type: Boolean,
-      required: true,
+      // required: true,
       default: false,
     },
     description: {
-      type: string,
+      type: String,
       // baad me retuired true krne hai
       // required:true
     },
     rating: {
-      type: number,
+      type: Number,
+      default: 0,
     },
     comments: {
       // it will be an array or priority queue

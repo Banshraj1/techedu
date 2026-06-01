@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 is file me vo controller rahega jo user pr perform hoga jaise update details like password login register history update ,playlist update, and create,token generation 
  */
 
-// furter to improve this add OTP feature also
+// further to improve this add OTP feature also
 const registerUser = asyncHandler(async (req, res) => {
   /*
     to check if required fields are present
@@ -80,7 +80,9 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
   const { email, password } = req.body;
-
+  console.log(email,password
+  );
+  
   if ([email, password].some((value) => !value?.trim())) {
     throw new ApiError(404, "All fields are required");
   }

@@ -1,7 +1,6 @@
 // import cloudinary from "cloudinary"
 import { v2 as cloudinary } from "cloudinary";
-import { asyncHandler } from "./AsyncHandler";
-import { ApiError } from "./ApiError";
+import { asyncHandler,ApiError } from "./index.js";
 import dotenv from "dotenv";
 dotenv.config({});
 
@@ -20,7 +19,7 @@ const uploadOnCloudinary = async (path) => {
     const response = await cloudinary.uploader.upload(path, {
       resource_type: "auto",
     });
-    console.log("File uploaded successfully");
+    console.log("cloudinary::File uploaded successfully");
     return response;
   } catch (error) {
     console.log("Error in uploading file", error);

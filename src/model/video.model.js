@@ -12,18 +12,22 @@ const videoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    thumbnailDetails: {
+      type: {},
+    },
+    videoDetails: {
+      type: {},
+    },
     duration: {
       // it will be in second
       type: Number,
       required: true,
     },
     owner: {
-      // TODO 💦❤️
-      // ye chal nhi rha abhi ke liye
-      type: mongoose.Schema.Types.ObjectId,
-      ref: User,
-      // type: {},
-      // required: true,
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: User,
+      type: String,
+      required: true,
     },
     isPublished: {
       type: Boolean,
@@ -32,7 +36,7 @@ const videoSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      // baad me retuired true krne hai
+      // baad me required true krne hai TODO
       // required:true
     },
     rating: {
@@ -57,5 +61,15 @@ const videoSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+videoSchema.methods.changeRating = async function (newRating) {
+  // console.log("in method");
+  this.rating = newRating;
+  return await this.save();
+};
+videoSchema.methods.changePublishStatus = async function (isPublished) {
+  this.isPublished = isPublished;
+  return await this.save();
+};
 
 export const Video = mongoose.model("Video", videoSchema);

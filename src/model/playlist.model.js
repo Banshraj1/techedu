@@ -1,9 +1,20 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
-// email ,phone no, name,password,wishlist,playlist,history
+const playlistSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    elements: {
+      type: [],
+    },
+    stars: {
+      type: Number,
+    },
+  },
+  { timestamps: true },
+);
 
-const playlistSchema=new mongoose.Schema({
-
-},{timestamps:true})
-
-export const Playlist=mongoose.model("Playlist",playlistSchema)
+export const Playlist = mongoose.model("Playlist", playlistSchema);

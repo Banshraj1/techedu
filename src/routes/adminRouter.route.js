@@ -7,6 +7,7 @@ import {
   deleteVideo,
   getVideoById,
   publishVideo,
+  banVideo,
 } from "../controllers/video.contorller.js";
 import { registerAdmin, loginAdmin } from "../controllers/admin.controller.js";
 const adminRouter = Router();
@@ -31,5 +32,7 @@ adminRouter.route("/c/rating").post(adminVerification, updateRating);
 adminRouter.route("/d/video").get(adminVerification, deleteVideo);
 adminRouter.route("/get/video").get(adminVerification, getVideoById);
 adminRouter.route("/publish/video").post(adminVerification, publishVideo);
+adminRouter.route("/ban/video").post(adminVerification, banVideo);
+
 
 export { adminRouter };

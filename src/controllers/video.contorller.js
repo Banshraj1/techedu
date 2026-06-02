@@ -167,6 +167,22 @@ const publishVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, myVideo, "Video published successfully"));
 });
 
-export { videoUploader, updateRating, deleteVideo, getVideoById, publishVideo };
+const banVideo = asyncHandler(async (req, res) => {
+  const verifiedAdmin = req.admin;
+  const { videoId } = req.body;
+  const myVideo = await Video.findById(videoId);
+  if (!myVideo) {
+    throw new ApiError(404, "Video not found");
+  }
+  const banVideoResponse = await myVideo.changePublishStatus(false);
+  if (!banVideoResponse) {
+    throw new ApiError(500, "Failed to ban video");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, myVideo, "Video banned successfully"));
+});
+
+export { videoUploader, updateRating, deleteVideo, getVideoById, publishVideo, banVideo };
 
 //_id= 6a1d5a2620f7887171b1faa6

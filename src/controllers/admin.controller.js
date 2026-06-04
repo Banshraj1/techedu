@@ -22,7 +22,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
   //   console.log("all fields are required");
   //   throw new ApiError(404, "All fields are required");
   // }
-  // console.log(adminname, email, phone, password, backupPassword);
+  console.log(adminname, email, phone, password, backupPassword);
   // TODO :: later check with phone no also
   const alreadyRegisteredAdmin = await Admin.findOne({ email: email }).select(
     "-password -backupPassword",
@@ -69,7 +69,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
 const loginAdmin = asyncHandler(async (req, res) => {
   //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
   const { email, password, backupPassword } = req.body;
-  console.log(email, password, backupPassword);
+  // console.log(email, password, backupPassword);
 
   if ([email, password, backupPassword].some((value) => !value?.trim())) {
     throw new ApiError(404, "All fields are required");

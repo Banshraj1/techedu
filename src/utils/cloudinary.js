@@ -27,14 +27,14 @@ const uploadOnCloudinary = async (path) => {
   }
 };
 
-const deleteFromCloudinary = async (publicId) => {
+const deleteFromCloudinary = async (publicId, resource_type = "auto") => {
   try {
     if (!publicId) {
       console.log("Public ID not available");
       return new ApiError(501, "Public ID not available");
     }
     const response = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "auto",
+      resource_type: resource_type,
     });
     console.log("cloudinary::File deleted successfully");
     return response;

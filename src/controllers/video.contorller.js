@@ -26,6 +26,9 @@ const videoUploader = asyncHandler(async (req, res) => {
   if (!verifiedAdmin) {
     throw new ApiError(401, "Unauthorised access Admin not found");
   }
+  if (!owner) {
+    throw new ApiError(400, "owner field is required");
+  }
   // console.log(req.files);
 
   const videoPath = req.files.video[0].path;
@@ -58,9 +61,7 @@ const videoUploader = asyncHandler(async (req, res) => {
     throw new ApiError(500, "error occired during creating new video ");
   }
   // console.log(newVideo);
-  console.log(
-    `congratulation ${verifiedAdmin.username}, your video uploaded successfully`,
-  );
+  console.log(`congratulation ${owner}, your video uploaded successfully`);
 
   return res
     .status(200)
@@ -69,11 +70,12 @@ const videoUploader = asyncHandler(async (req, res) => {
 
 const updateRating = asyncHandler(async (req, res) => {
   const verifiedAdmin = req.admin;
+  // console.log(req);
   const { rating, videoId } = req.body;
+  // console.log(rating, videoId);
   if (!rating || rating < 0 || rating > 10) {
     throw new ApiError(400, "Invalid rating value");
   }
-  // console.log(rating, videoId);
   const myVideo = await Video.findById(videoId);
   if (!myVideo) {
     throw new ApiError(404, "Video not found");
@@ -92,8 +94,7 @@ const updateRating = asyncHandler(async (req, res) => {
   // }
 
   const isRatingchanged = await myVideo.changeRating(rating);
-  console.log("here");
-  console.log(isRatingchanged);
+  // console.log(isRatingchanged);
   if (!isRatingchanged) {
     throw new ApiError(500, "some error occured during changing rating");
   }
@@ -124,6 +125,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   // Delete the video file from Cloudinary
   const deletedFromCloudinary = await deleteFromCloudinary(
     myVideo.videoDetails.public_id,
+    myVideo.videoDetails.resource_type,
   );
   if (!deletedFromCloudinary) {
     throw new ApiError(500, "Failed to delete video from Cloudinary");
@@ -131,6 +133,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   // Delete the thumbnail file from Cloudinary
   const deletedThumbnailFromCloudinary = await deleteFromCloudinary(
     myVideo.thumbnailDetails.public_id,
+    myVideo.thumbnailDetails.resource_type,
   );
   if (!deletedThumbnailFromCloudinary) {
     throw new ApiError(500, "Failed to delete thumbnail from Cloudinary");
@@ -158,6 +161,12 @@ const publishVideo = asyncHandler(async (req, res) => {
   if (!myVideo) {
     throw new ApiError(404, "Video not found");
   }
+  if (!verifiedAdmin) {
+    throw new ApiError(401, "Unauthorised access::Admin not found");
+  }
+  if (myVideo.isPublished) {
+    throw new ApiError(400, "Video is already published");
+  }
   const publishedResponse = await myVideo.changePublishStatus(true);
   if (!publishedResponse) {
     throw new ApiError(500, "Failed to publish video");
@@ -174,6 +183,12 @@ const banVideo = asyncHandler(async (req, res) => {
   if (!myVideo) {
     throw new ApiError(404, "Video not found");
   }
+  if (!verifiedAdmin) {
+    throw new ApiError(401, "Unauthorised access::Admin not found");
+  }
+  if (!myVideo.isPublished) {
+    throw new ApiError(400, "Video is already banned");
+  }
   const banVideoResponse = await myVideo.changePublishStatus(false);
   if (!banVideoResponse) {
     throw new ApiError(500, "Failed to ban video");
@@ -183,6 +198,13 @@ const banVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, myVideo, "Video banned successfully"));
 });
 
-export { videoUploader, updateRating, deleteVideo, getVideoById, publishVideo, banVideo };
+export {
+  videoUploader,
+  updateRating,
+  deleteVideo,
+  getVideoById,
+  publishVideo,
+  banVideo,
+};
 
-//_id= 6a1d5a2620f7887171b1faa6
+//_id= 6a20cbb79e681365cb4abd37

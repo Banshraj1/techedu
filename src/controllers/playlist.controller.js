@@ -1,7 +1,7 @@
 import { Playlist } from "../model/playlist.model.js";
 import { User } from "../model/user.model.js";
 import { Admin } from "../model/admin.model.js";
-import { asyncHandler, ApiResponse, ApiError } from "../utils";
+import { asyncHandler, ApiResponse, ApiError } from "../utils/index.js";
 import { Video } from "../model/video.model.js";
 // isme playlist crete krne ka method hoga usme elements add krne ka and element delete krne ka then playlist delete krne ka
 //
@@ -22,7 +22,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
   const createdPlaylist = await Playlist.create({
     playlistName: playlistName,
-    elements: null,
+    elements: [],
     stars: 0,
   });
 
@@ -70,12 +70,13 @@ const insertOne = asyncHandler(async (req, res) => {
         "some error occured during video addition in given playlist",
       );
     }
+
     return res
       .status(200)
       .json(new ApiResponse(200, response, "Video added successfully"));
   } else {
     // we need to create a new one
-    let videoArray = [video];
+    let videoArray = [video._id];
     const newPlaylist = await Playlist.create({
       playlistName: playlistName,
       elements: videoArray,
@@ -96,6 +97,7 @@ const insertMultiple = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Unauthorised access::admin not found");
   }
   const { playlistId, videos } = req.body; // video is an array of video ids
+  const videoarrcomming = videos.split(",").map((id) => id.trim());
   if (!playlistId) {
     throw new ApiError(404, "playlistId is must");
   }
@@ -105,21 +107,22 @@ const insertMultiple = asyncHandler(async (req, res) => {
     throw new ApiError(404, "playlist with given id not found");
   }
 
-  if (!videos || videos.length === 0) {
+  if (!videoarrcomming || videoarrcomming.length === 0) {
     throw new ApiError(404, "videos array is must and should not be empty");
   }
-  for (let id of videos) {
+  for (let id of videoarrcomming) {
     const video = await Video.findById(id);
     if (!video) {
       throw new ApiError(404, `Video with given id ${id} not found`);
     }
   }
-  let videoArray = [];
-  for (let id of videos) {
+  //TODO :: we can optimize this by using $in operator of mongoose to fetch all videos in one query instead of multiple queries in above loop
+  let videoIdArray = [];
+  for (let id of videoarrcomming) {
     const video = await Video.findById(id);
-    videoArray.push(video);
+    videoIdArray.push(video._id);
   }
-  const response = await searchPlaylist.addMultipleVideo(videoArray);
+  const response = await searchPlaylist.addMultipleVideo(videoIdArray);
   if (!response) {
     throw new ApiError(
       500,
@@ -131,9 +134,18 @@ const insertMultiple = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, response, "Videos added successfully"));
 });
 
-// const insertById = asyncHandler(async (req, res) => {});
+const getPlaylistById = asyncHandler(async (req, res) => {
+  const { playlistId } = req.body;
+  const playlist = await Playlist.findById(playlistId);
+  if (!playlist) {
+    throw new ApiError(404, "Playlist not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, playlist, "Playlist found successfully"));
+});
 
-const deleteVideo = asyncHandler(async (req, res) => {
+const deleteVideoInPlaylist = asyncHandler(async (req, res) => {
   const admin = req.admin;
   if (!admin) {
     throw new ApiError(404, "Unauthorised access::admin not found");
@@ -187,6 +199,7 @@ export {
   createPlaylist,
   insertOne,
   insertMultiple,
-  deleteVideo,
+  deleteVideoInPlaylist,
   deletePlaylist,
+  getPlaylistById,
 };

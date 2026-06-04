@@ -9,10 +9,18 @@ const adminRouter = Router();
 // })
 
 // these routes for admin registration and login
-import { registerAdmin, loginAdmin } from "../controllers/admin.controller.js";
+import {
+  registerAdmin,
+  loginAdmin,
+  logoutAdmin,
+  deleteAdmin,
+} from "../controllers/admin.controller.js";
 
+// for register register, email,password,backupPassword,phone
 adminRouter.route("/register").post(registerAdmin);
 adminRouter.route("/login").post(loginAdmin);
+adminRouter.route("/logout").post(adminVerification, logoutAdmin);
+adminRouter.route("/delete").delete(adminVerification, deleteAdmin);
 
 //these rotues are for video management
 import {
@@ -24,7 +32,7 @@ import {
   banVideo,
 } from "../controllers/video.contorller.js";
 
-adminRouter.route("/upload").post(
+adminRouter.route("/v/upload").post(
   adminVerification,
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
@@ -32,25 +40,33 @@ adminRouter.route("/upload").post(
   ]),
   videoUploader,
 );
-adminRouter.route("/v/create/rating").patch(adminVerification, updateRating);
-adminRouter.route("/v/delete/video").delete(adminVerification, deleteVideo);
+adminRouter.route("/v/change/rating").patch(adminVerification, updateRating);
 adminRouter.route("/v/get/video").get(adminVerification, getVideoById);
 adminRouter.route("/v/publish/video").patch(adminVerification, publishVideo);
 adminRouter.route("/v/ban/video").patch(adminVerification, banVideo);
+adminRouter.route("/v/delete/video").delete(adminVerification, deleteVideo);
 
 // these routes are for playlist management
 import {
   createPlaylist,
   insertOne,
   insertMultiple,
-  deleteVideo,
+  deleteVideoInPlaylist,
   deletePlaylist,
+  getPlaylistById,
 } from "../controllers/playlist.controller.js";
 
 adminRouter.route("/p/create/playlist").post(adminVerification, createPlaylist);
 adminRouter.route("/p/insert/video").patch(adminVerification, insertOne);
 adminRouter.route("/p/insert/videos").patch(adminVerification, insertMultiple);
-adminRouter.route("/p/delete/video").delete(adminVerification, deleteVideo);
-adminRouter.route("/p/delete/playlist").delete(adminVerification, deletePlaylist);
+adminRouter
+  .route("/p/delete/video")
+  .delete(adminVerification, deleteVideoInPlaylist);
+adminRouter
+  .route("/p/delete/playlist")
+  .delete(adminVerification, deletePlaylist);
+
+adminRouter.route("/p/get/playlist").get(getPlaylistById); // no need of admin verification
+// upar tk sb thik hai
 
 export { adminRouter };

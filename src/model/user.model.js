@@ -70,10 +70,10 @@ userSchema.methods.generateAcessToken = async function () {
       phone: this.phone,
     }, //data
     process.env.ACCESSTOKENSECRET, //secret key
-    { //expiry 
+    {
+      //expiry
       expiresIn: process.env.ACCESSTOKENEXPIRY,
     },
-    
   );
 
   // return accessToken;
@@ -83,7 +83,16 @@ userSchema.methods.generateAcessToken = async function () {
 // using this we can REVOKE TOKEN, BLOCK USER and MANAGE SESSIONS
 
 userSchema.methods.saveAccessToken = async function (token) {
-  return (this.accessToken = token);
+  this.accessToken = token;
+  return this.save();
+};
+userSchema.methods.addInWatchHistory = function (videoId) {
+  this.watchHistory.push(videoId);
+  return this.save();
+};
+userSchema.methods.removeFromWatchHistory = function (videoId) {
+  this.watchHistory = this.watchHistory.filter((elem) => elem._id != videoId);
+  return this.save();
 };
 
 export const User = mongoose.model("User", userSchema);

@@ -135,8 +135,16 @@ const insertMultiple = asyncHandler(async (req, res) => {
 });
 
 const getPlaylistById = asyncHandler(async (req, res) => {
-  const { playlistId } = req.body;
+  const { playlistId } = req.params;
+  console.log(req.body);
+  
+  console.log(req.params);
+  console.log(req.query);
+  
+
+  console.log(playlistId);
   const playlist = await Playlist.findById(playlistId);
+
   if (!playlist) {
     throw new ApiError(404, "Playlist not found");
   }

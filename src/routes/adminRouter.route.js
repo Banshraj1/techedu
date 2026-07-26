@@ -7,7 +7,6 @@ const adminRouter = Router();
 // router.route("/upload").get((req,res,next)=>{
 //     res.send("Hello ")
 // })
-
 // these routes for admin registration and login
 import {
   registerAdmin,
@@ -30,6 +29,7 @@ import {
   getVideoById,
   publishVideo,
   banVideo,
+  updateVideoDetails,
 } from "../controllers/video.contorller.js";
 
 adminRouter.route("/v/upload").post(
@@ -41,10 +41,11 @@ adminRouter.route("/v/upload").post(
   videoUploader,
 );
 adminRouter.route("/v/change/rating").patch(adminVerification, updateRating);
-adminRouter.route("/v/get/video").get(adminVerification, getVideoById);
+adminRouter.route("/v/get/video/:videoId").get(getVideoById);
 adminRouter.route("/v/publish/video").patch(adminVerification, publishVideo);
 adminRouter.route("/v/ban/video").patch(adminVerification, banVideo);
 adminRouter.route("/v/delete/video").delete(adminVerification, deleteVideo);
+adminRouter.route("/v/update/video").patch(adminVerification, updateVideoDetails);
 
 // these routes are for playlist management
 import {
@@ -66,7 +67,7 @@ adminRouter
   .route("/p/delete/playlist")
   .delete(adminVerification, deletePlaylist);
 
-adminRouter.route("/p/get/playlist").get(getPlaylistById); // no need of admin verification
+adminRouter.route("/p/get/playlist/:playlistId").get(getPlaylistById); // no need of admin verification
 // upar tk sb thik hai
 
 export { adminRouter };

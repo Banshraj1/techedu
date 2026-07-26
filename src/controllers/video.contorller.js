@@ -4,68 +4,125 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/index.js";
 // isme video upload and delete ka code hoga
 // rating change krne ka code hoga also likes and connent bhi yahi se mannage hoga
 
+// const videoUploader = asyncHandler(async (req, res) => {
+//   // console.log("request recieved");
+
+//   // sabse pahle validate krna hai ki user ek valid user hai using that JWT halanki frontend bhi validate krega but yha se bhi validate krna important hai
+
+//   // video bahut badi nhi honi chahiye abhi ke liye
+
+//   // isme user se path lekr usko cloudinary pr upload krana hai then wha se jo response milega usse ek nya video bna kr uska jo response milega usko user ko de dena hai
+
+//   const verifiedAdmin = req.admin;
+//   // console.log(verifiedUser);
+
+//   const {
+//     isPublished = false,
+//     description = "No description",
+//     rating,
+//     owner,
+//   } = req.body;
+
+//   if (!verifiedAdmin) {
+//     throw new ApiError(401, "Unauthorised access Admin not found");
+//   }
+//   if (!owner) {
+//     throw new ApiError(400, "owner field is required");
+//   }
+//   // console.log(req.files);
+
+//   const videoPath = req.files.video[0].path;
+//   const thumbnailPath = req.files.thumbnail[0].path;
+//   // console.log(videoPath);
+
+//   if (!videoPath) {
+//     throw new ApiError(404, "video path not found");
+//   }
+//   const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
+//   const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
+
+//   // console.log(uploadedVideoResponse);user
+
+//   if (!uploadedVideoResponse) {
+//     throw new ApiError(500, "Some error occured during uploading video");
+//   }
+
+//   const newVideo = await Video.create({
+//     url: uploadedVideoResponse.secure_url,
+//     thumbnail: uploadedthumbnailResponse.secure_url,
+//     duration: uploadedVideoResponse.duration,
+//     thumbnailDetails: uploadedthumbnailResponse,
+//     videoDetails: uploadedVideoResponse,
+//     owner: owner,
+//     isPublished: isPublished,
+//     description: description,
+//   });
+//   if (!newVideo) {
+//     throw new ApiError(500, "error occired during creating new video ");
+//   }
+//   // console.log(newVideo);
+//   console.log(`congratulation ${owner}, your video uploaded successfully`);
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, newVideo, "new video uploaded succcessfully"));
+// });
+import {ffmpegFxn} from "../upload/ffmpeg/asdf.js"
 const videoUploader = asyncHandler(async (req, res) => {
-  console.log("request recieved");
+    const verifiedAdmin = req.admin;
 
-  // sabse pahle validate krna hai ki user ek valid user hai using that JWT halanki frontend bhi validate krega but yha se bhi validate krna important hai
+    const {
+        isPublished = false,
+        description = "No description",
+        rating,
+        owner,
+    } = req.body;
 
-  // video bahut badi nhi honi chahiye abhi ke liye
+    if (!verifiedAdmin) {
+        throw new ApiError(401, "Unauthorised access Admin not found");
+    }
+    if (!owner) {
+        throw new ApiError(400, "owner field is required");
+    }
+    // console.log(req.files);
 
-  // isme user se path lekr usko cloudinary pr upload krana hai then wha se jo response milega usse ek nya video bna kr uska jo response milega usko user ko de dena hai
+    const videoPath = req.files.video[0].path;
+    const thumbnailPath = req.files.thumbnail[0].path;
+    // console.log(videoPath);
 
-  const verifiedAdmin = req.admin;
-  // console.log(verifiedUser);
+    if (!videoPath) {
+        throw new ApiError(404, "video path not found");
+    }
+    const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
+    const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
 
-  const {
-    isPublished = false,
-    description = "No description",
-    rating,
-    owner,
-  } = req.body;
+    // console.log(uploadedVideoResponse);user
 
-  if (!verifiedAdmin) {
-    throw new ApiError(401, "Unauthorised access Admin not found");
-  }
-  if (!owner) {
-    throw new ApiError(400, "owner field is required");
-  }
-  // console.log(req.files);
+    if (!uploadedVideoResponse) {
+        throw new ApiError(500, "Some error occured during uploading video");
+    }
 
-  const videoPath = req.files.video[0].path;
-  const thumbnailPath = req.files.thumbnail[0].path;
-  // console.log(videoPath);
+    const newVideo = await Video.create({
+        url: uploadedVideoResponse.secure_url,
+        thumbnail: uploadedthumbnailResponse.secure_url,
+        duration: uploadedVideoResponse.duration,
+        thumbnailDetails: uploadedthumbnailResponse,
+        videoDetails: uploadedVideoResponse,
+        owner: owner,
+        isPublished: isPublished,
+        description: description,
+    });
+    if (!newVideo) {
+        throw new ApiError(500, "error occired during creating new video ");
+    }
+    // console.log(newVideo);
+    console.log(`congratulation ${owner}, your video uploaded successfully`);
 
-  if (!videoPath) {
-    throw new ApiError(404, "video path not found");
-  }
-  const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
-  const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
-
-  // console.log(uploadedVideoResponse);user
-
-  if (!uploadedVideoResponse) {
-    throw new ApiError(500, "Some error occured during uploading video");
-  }
-
-  const newVideo = await Video.create({
-    url: uploadedVideoResponse.secure_url,
-    thumbnail: uploadedthumbnailResponse.secure_url,
-    duration: uploadedVideoResponse.duration,
-    thumbnailDetails: uploadedthumbnailResponse,
-    videoDetails: uploadedVideoResponse,
-    owner: owner,
-    isPublished: isPublished,
-    description: description,
-  });
-  if (!newVideo) {
-    throw new ApiError(500, "error occired during creating new video ");
-  }
-  // console.log(newVideo);
-  console.log(`congratulation ${owner}, your video uploaded successfully`);
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, newVideo, "new video uploaded succcessfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, newVideo, "new video uploaded succcessfully"),
+        );
 });
 
 const updateRating = asyncHandler(async (req, res) => {
@@ -144,7 +201,8 @@ const deleteVideo = asyncHandler(async (req, res) => {
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
-  const { videoId } = req.body;
+  const { videoId } = req.params;
+  console.log(videoId);
   const myVideo = await Video.findById(videoId);
   if (!myVideo) {
     throw new ApiError(404, "Video not found");
@@ -197,6 +255,49 @@ const banVideo = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, myVideo, "Video banned successfully"));
 });
+const updateVideoDetails = asyncHandler(async (req, res) => {
+  const verifiedAdmin = req.admin;
+  const { videoId, title, description, owner } = req.body;
+  console.log(videoId, title, description, owner);
+  const myVideo = await Video.findById(videoId);
+  if (!videoId) {
+    throw new ApiError(400, "Video ID is required");
+  }
+  if (!title && !description && !owner) {
+    throw new ApiError(
+      400,
+      "At least one field (title, description, owner) is required to update",
+    );
+  }
+  if (!myVideo) {
+    throw new ApiError(404, "Video not found");
+  }
+  if (!verifiedAdmin) {
+    throw new ApiError(401, "Unauthorised access::Admin not found");
+  }
+  if (title) {
+    const updatedTitleResponse = await myVideo.changeTitle(title);
+    if (!updatedTitleResponse) {
+      throw new ApiError(500, "Failed to update video title");
+    }
+  }
+  if (owner) {
+    const updatedOwnerResponse = await myVideo.changeOwner(owner);
+    if (!updatedOwnerResponse) {
+      throw new ApiError(500, "Failed to update video owner");
+    }
+  }
+  if (description) {
+    const updatedDescriptionResponse =
+      await myVideo.changeDescription(description);
+    if (!updatedDescriptionResponse) {
+      throw new ApiError(500, "Failed to update video description");
+    }
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, myVideo, "Video details updated successfully"));
+});
 
 export {
   videoUploader,
@@ -205,6 +306,7 @@ export {
   getVideoById,
   publishVideo,
   banVideo,
+  updateVideoDetails,
 };
 
 //_id= 6a20cbb79e681365cb4abd37

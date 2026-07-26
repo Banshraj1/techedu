@@ -4,6 +4,11 @@ import { User } from "./user.model.js";
 // link from aws,description,likes,dislikes,comments,uploaded at
 const videoSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     url: {
       type: String,
       required: true,
@@ -62,14 +67,27 @@ const videoSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-videoSchema.methods.changeRating = async function (newRating) {
+videoSchema.methods.changeRating = function (newRating) {
   // console.log("in method");
   this.rating = newRating;
-  return await this.save();
+  return this.save();
 };
-videoSchema.methods.changePublishStatus = async function (isPublished) {
+videoSchema.methods.changePublishStatus = function (isPublished) {
   this.isPublished = isPublished;
-  return await this.save();
+  return this.save();
 };
+videoSchema.methods.changeTitle = function (newTitle) {
+  this.title = newTitle;
+  return this.save();
+};
+videoSchema.methods.changeDescription = function (newDescription) {
+  this.description = newDescription;
+  return this.save();
+};
+videoSchema.methods.changeOwner = function (newOwner) {
+  this.owner = newOwner;
+  return this.save();
+};
+
 
 export const Video = mongoose.model("Video", videoSchema);

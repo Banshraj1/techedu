@@ -5,6 +5,7 @@ import { asyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { User } from "../model/user.model.js";
 import { trusted } from "mongoose";
 import jwt from "jsonwebtoken";
+// import { use } from "react";
 
 /*
 is file me vo controller rahega jo user pr perform hoga jaise update details like password login register history update ,playlist update, and create,token generation 
@@ -80,9 +81,8 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
   const { email, password } = req.body;
-  console.log(email,password
-  );
-  
+  console.log(email, password);
+
   if ([email, password].some((value) => !value?.trim())) {
     throw new ApiError(404, "All fields are required");
   }
@@ -203,5 +203,76 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 //upar tk sb thik hai
+const aboutUser = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    console.log("user not found");
+    throw new ApiError(404, "unauthorised access");
+  }
+  const response = await User.findById(user._id).select("-password");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, response, "Used data found successfully"));
+});
 
-export { registerUser, loginUser, logoutUser, deleteUser };
+const expandWatchHistory = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { videoId } = req.params;
+  // videos is an array
+  if (!user) {
+    throw new ApiError(404, "Unauthorised access::admin not found");
+  }
+
+  if (!videoId) {
+    console.log("VideoId is must");
+    throw new ApiError(404, "VideoId is must");
+  }
+
+  const response = await user.addInWatchHistory(videoId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        response,
+        "Video added in watch history successfully",
+      ),
+    );
+});
+
+const compressWatchHistory = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { videoId } = req.params;
+  // videos is an array
+  if (!user) {
+    throw new ApiError(404, "Unauthorised access::admin not found");
+  }
+
+  if (!videoId) {
+    console.log("VideoId is must");
+    throw new ApiError(404, "VideoId is must");
+  }
+
+  const response = await user.removeFromWatchHistory(videoId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        response,
+        "Video removed from watch history successfully",
+      ),
+    );
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  deleteUser,
+  aboutUser,
+  expandWatchHistory,
+  compressWatchHistory,
+};

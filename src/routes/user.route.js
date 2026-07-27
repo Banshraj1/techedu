@@ -5,6 +5,7 @@ import {
   logoutUser,
   registerUser,
   aboutUser,
+  getCurrentUser,
   expandWatchHistory,
   compressWatchHistory,
 } from "../controllers/user.controller.js";
@@ -23,6 +24,7 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJwt, logoutUser);
 router.route("/delete").post(verifyJwt, deleteUser);
 router.route("/about/:username").post(verifyJwt, aboutUser);
+router.route("/get-me").get(verifyJwt, getCurrentUser);
 router.route("/watch-history/expand:videoId").patch(verifyJwt, expandWatchHistory);
 router.route("/watch-history/compress:videoId").patch(verifyJwt, compressWatchHistory);
 export { router };

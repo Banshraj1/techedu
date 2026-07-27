@@ -5,13 +5,14 @@ import { asyncHandler, ApiError } from "../utils/index.js";
 import { Admin } from "../model/admin.model.js";
 import jwt from "jsonwebtoken";
 dotev.config({});
+import { User } from "../model/user.model.js";
 
 export const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
     // console.log(req);
     const token = req?.cookies.accessToken;
 
-    // console.log(token);
+    console.log(token);
 
     if (!token) {
       throw new ApiError(404, "Access token not found");
@@ -19,11 +20,11 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
     const SECRET_KEY = process.env.ACCESSTOKENSECRET;
     const isVerified = await jwt.verify(token, SECRET_KEY);
 
-    // console.log(isVerified);
-
+    
     if (!isVerified) {
       throw new ApiError(400, "unauthorised access");
     }
+    // console.log(isVerified);
 
     const user = await User.findOne({ email: isVerified.email }).select(
       "-password",
@@ -31,7 +32,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
     // console.log(user);
 
     req.user = user;
-    console.log("jwt verification successfull");
+    console.log("jwt verification successfullj");
 
     next();
   } catch (error) {

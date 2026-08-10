@@ -12,7 +12,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
     // console.log(req);
     const token = req?.cookies.accessToken;
 
-    console.log(token);
+    // console.log(token);
 
     if (!token) {
       throw new ApiError(404, "Access token not found");

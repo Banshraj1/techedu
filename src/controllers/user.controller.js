@@ -8,8 +8,8 @@ import jwt from "jsonwebtoken";
 // import { use } from "react";
 
 /*
-is file me vo controller rahega jo user pr perform hoga jaise update details like password login register history update ,playlist update, and create,token generation 
- */
+is file me vo controller rahega jo user pr perform hoga jaise update details like password login register history update ,playlist update, and create,token generation
+*/
 
 // further to improve this add OTP feature also
 const registerUser = asyncHandler(async (req, res) => {
@@ -43,7 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // console.log(alreadyRegisteredUser);
     // console.log("email=",alreadyRegisteredUser.email);
 
-    if (alreadyRegisteredUser != null) {
+    if (alreadyRegisteredUser != false) {
         console.log("User with this email already registered");
         throw new ApiError(
             400,
@@ -95,8 +95,9 @@ const loginUser = asyncHandler(async (req, res) => {
     // console.log(loggedinUser);
 
     const isPasswordCorrect = await loggedinUser.isPasswordCorrect(password);
-
-    if (isPasswordCorrect === null) {
+    console.log(isPasswordCorrect);
+    
+    if (!isPasswordCorrect) {
         throw new ApiError(402, "Invalid credentials...");
     }
     const accessToken = await loggedinUser.generateAcessToken();

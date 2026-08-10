@@ -21,7 +21,7 @@ const router = Router();
 
 router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
-router.route("/logout").post(verifyJwt, logoutUser);
+router.route("/logout").get(verifyJwt, logoutUser);
 router.route("/delete").post(verifyJwt, deleteUser);
 router.route("/about/:username").post(verifyJwt, aboutUser);
 router.route("/get-me").get(verifyJwt, getCurrentUser);

@@ -6,12 +6,17 @@ dotenv.config();
 const port = process.env.port;
 const app = express();
 
+app.use((req, res, next) => {
+    console.log("Origin:", req.headers.origin);
+    next();
+});
+
 app.use(
     cors({
         origin: [
             "http://localhost:5173",
             "https://techedu-eta.vercel.app",
-            "https://techedu-frontend.vercel.app/",
+            "https://techedu-frontend.vercel.app",
         ],
         credentials: true,
     }),

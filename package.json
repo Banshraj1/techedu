@@ -1,32 +1,33 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start": "nodemon index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Banshraj1/techedu.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Banshraj1/techedu/issues"
-  },
-  "homepage": "https://github.com/Banshraj1/techedu#readme",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cloudinary": "^2.10.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^4.22.2",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.6.2",
-    "multer": "^2.1.1",
-    "nodemon": "^3.1.14"
-  },
-  "description": ""
+    "name": "backend",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Banshraj1/techedu.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Banshraj1/techedu/issues"
+    },
+    "homepage": "https://github.com/Banshraj1/techedu#readme",
+    "dependencies": {
+        "bcrypt": "^6.0.0",
+        "cloudinary": "^2.10.0",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^4.22.2",
+        "jsonwebtoken": "^9.0.3",
+        "mongoose": "^9.6.2",
+        "multer": "^2.1.1",
+        "nodemon": "^3.1.14"
+    },
+    "description": ""
 }

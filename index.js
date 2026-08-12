@@ -9,9 +9,10 @@ connectdb()
     app.get("/", (req, res) => {
       res.send("Hello World!");
     });
-    app.listen(port, (req, res) => {
-      console.log(`app is listening on port ${port}`);
-    });
+    // removed for deployement purpose only
+    // app.listen(port, (req, res) => {
+    //   console.log(`app is listening on port ${port}`);
+    // });
   })
   .catch((error) => {
     console.log("db connection error", error);

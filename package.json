@@ -4,6 +4,10 @@
         "start": "node index.js"
     },
     "dependencies": {
+        "bcrypt": "^6.0.0",
+        "cloudinary": "^2.10.0",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.6",
         "express": "4.21.2"
     }
 }

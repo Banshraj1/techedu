@@ -1,14 +1,21 @@
-import express from "express";
+// import dotenv from "dotenv";
+// dotenv.config({});
+// const port = process.env.PORT;
+// import app from "./src/App.js";
+// import { connectdb } from "./src/db/connectdb.js";
 
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("Working");
-});
-app.get("/test", (req, res) => {
-    res.send("Working test is good");
-});
-
-app.listen(8000, () => {
-  console.log("running");
-});
+// connectdb()
+//   .then(() => {
+//     app.get("/", (req, res) => {
+//       res.send("Hello World!");
+//     });
+//     // removed for deployement purpose only
+//     app.listen(port, (req, res) => {
+//       console.log(`app is listening on port ${port}`);
+//     });
+//   })
+//   .catch((error) => {
+//     console.log("db connection error", error);
+//     throw new error("DB connection error");
+//     // app.on("error")
+//   });

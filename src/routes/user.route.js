@@ -1,30 +1,30 @@
-import { Router } from "express";
-import {
-  deleteUser,
-  loginUser,
-  logoutUser,
-  registerUser,
-  aboutUser,
-  getCurrentUser,
-  expandWatchHistory,
-  compressWatchHistory,
-} from "../controllers/user.controller.js";
-import { verifyJwt } from "../middleware/auth.middleware.js";
-const router = Router();
+// import { Router } from "express";
+// import {
+//   deleteUser,
+//   loginUser,
+//   logoutUser,
+//   registerUser,
+//   aboutUser,
+//   getCurrentUser,
+//   expandWatchHistory,
+//   compressWatchHistory,
+// } from "../controllers/user.controller.js";
+// import { verifyJwt } from "../middleware/auth.middleware.js";
+// const router = Router();
 
-// console.log(registerUser);
+// // console.log(registerUser);
 
-// this is a demo for router.route
-// router.route("/hello").get((req,res,next)=>{
-//     res.send("Hello ")
-// })
+// // this is a demo for router.route
+// // router.route("/hello").get((req,res,next)=>{
+// //     res.send("Hello ")
+// // })
 
-router.route("/register").post(registerUser);
-router.route("/login").post(loginUser);
-router.route("/logout").get(verifyJwt, logoutUser);
-router.route("/delete").post(verifyJwt, deleteUser);
-router.route("/about/:username").post(verifyJwt, aboutUser);
-router.route("/get-me").get(verifyJwt, getCurrentUser);
-router.route("/watch-history/expand:videoId").patch(verifyJwt, expandWatchHistory);
-router.route("/watch-history/compress:videoId").patch(verifyJwt, compressWatchHistory);
-export { router };
+// router.route("/register").post(registerUser);
+// router.route("/login").post(loginUser);
+// router.route("/logout").get(verifyJwt, logoutUser);
+// router.route("/delete").post(verifyJwt, deleteUser);
+// router.route("/about/:username").post(verifyJwt, aboutUser);
+// router.route("/get-me").get(verifyJwt, getCurrentUser);
+// router.route("/watch-history/expand:videoId").patch(verifyJwt, expandWatchHistory);
+// router.route("/watch-history/compress:videoId").patch(verifyJwt, compressWatchHistory);
+// export { router };

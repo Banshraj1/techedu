@@ -1,4 +1,4 @@
-export function ffmpegFxn({ videoPath }) {
+function ffmpegFxn({ videoPath }) {
     const lessonId = uuidv4();
     const outputPath = `./uploads/cources/${lessonId}`;
     const hlsPath = `${outputPath}/index.m3u8`;
@@ -7,6 +7,7 @@ export function ffmpegFxn({ videoPath }) {
         fs.mkdirSync(outputPath, { recursive: true });
     }
     const ffmpegCommand = `ffmpeg -i ${videoPath} -codec:v libx264 -codec:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename "${outputPath}/segment%03d.ts" -start_number 0 ${hlsPath}`;
+
 
     // no queue because of POC,
     exec(ffmpegCommand, (error, stdout, stderr) => {
@@ -24,3 +25,5 @@ export function ffmpegFxn({ videoPath }) {
         lessonId: lessonId,
     };
 }
+
+export {ffmpegFxn}

@@ -96,13 +96,14 @@ const videoUploader = asyncHandler(async (req, res) => {
     const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
     const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
 
-    // console.log(uploadedVideoResponse);user
+    // console.log(uploadedVideoResponse);
 
     if (!uploadedVideoResponse) {
         throw new ApiError(500, "Some error occured during uploading video");
     }
 
     const newVideo = await Video.create({
+        title:uploadedVideoResponse.title||"some title "+Math.random()*1000,
         url: uploadedVideoResponse.secure_url,
         thumbnail: uploadedthumbnailResponse.secure_url,
         duration: uploadedVideoResponse.duration,

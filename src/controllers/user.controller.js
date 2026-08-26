@@ -123,8 +123,8 @@ const loginUser = asyncHandler(async (req, res) => {
         .status(200)
         .cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
         })
         .json(new ApiResponse(200, response, "logged in successfull"));
 });

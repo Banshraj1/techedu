@@ -2,9 +2,10 @@
     "type": "module",
     "scripts": {
         "start": "node index.js",
-        "dev":"nodemon index.js"
+        "dev": "nodemon index.js"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.1119.0",
         "bcrypt": "^6.0.0",
         "cloudinary": "^2.10.0",
         "cookie-parser": "^1.4.7",
@@ -13,7 +14,8 @@
         "express": "^4.21.2",
         "jsonwebtoken": "^9.0.3",
         "mongoose": "^9.9.2",
-        "multer": "^2.2.0"
+        "multer": "^2.2.0",
+        "uuid": "^14.0.2"
     },
     "devDependencies": {
         "nodemon": "^3.1.14"

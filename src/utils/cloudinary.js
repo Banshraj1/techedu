@@ -2,6 +2,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import { asyncHandler, ApiError } from "./index.js";
 import dotenv from "dotenv";
+import path from "path";
 dotenv.config({});
 
 cloudinary.config({

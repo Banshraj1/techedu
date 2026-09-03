@@ -37,6 +37,7 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "16kb" }));
 app.use(express.raw({ limit: "16kb" }));
 app.use(express.static("public"));
+app.use(express.static("./uploads"));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 // it will help in reading cookie which req  brings from frontend

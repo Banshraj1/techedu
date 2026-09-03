@@ -1,9 +1,12 @@
 import { Video } from "../model/video.model.js";
 // import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
 import { asyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/index.js";
 import { uploadToS3 } from "../utils/uploadToS3.js";
 import { ffmpegFxn } from "../upload/ffmpeg/index.js";
+import { error } from "console";
+import path from "path";
 // isme video upload and delete ka code hoga
 // rating change krne ka code hoga also likes and connent bhi yahi se mannage hoga
 
@@ -78,6 +81,7 @@ const videoUploader = asyncHandler(async (req, res) => {
         description = "No description",
         rating,
         owner,
+        title,
     } = req.body;
 
     if (!verifiedAdmin) {
@@ -86,52 +90,49 @@ const videoUploader = asyncHandler(async (req, res) => {
     if (!owner) {
         throw new ApiError(400, "owner field is required");
     }
-    // console.log(req.files);
-
     const videoPath = req.files.video[0].path;
     const thumbnailPath = req.files.thumbnail[0].path;
-    console.log(videoPath);
-    
+    // console.log(videoPath);
+
     if (!videoPath) {
-      throw new ApiError(404, "video path not found");
+        throw new ApiError(404, "video path not found");
     }
-    
-    const ffmpegProccessedResponse = ffmpegFxn("src/public/sample5.mp4");
-    // console.log("tihis is ffmpeg",ffmpegProccessedResponse);
-    
+    const ffmpegProccessedResponse = await ffmpegFxn(videoPath);
     if (!ffmpegProccessedResponse) {
-      throw new ApiError(500, "failed to process ffmpeg");
+        throw new ApiError(500, "failed to process ffmpeg");
     }
-    console.log(ffmpegProccessedResponse.folder);
-    
-    const url = await uploadToS3(
-      ffmpegProccessedResponse.folder,
-      ffmpegProccessedResponse.lessonId + "/lecture",
-      "video/mp4",
-    );
-    console.log(url);
-    return res.status(200).json(
-      ffmpegProccessedResponse
+    if (!fs.existsSync(ffmpegProccessedResponse.folder)) {
+        throw new error(
+            "file path not exist which was returned from ffmpeg processing",
+        );
+    }
+    const files = fs.readdirSync(ffmpegProccessedResponse.folder);
+    // console.log(files);
 
-    )
-      
-      const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
-      const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
-      
+    for (const file of files) {
+        const responseOfS3 = await uploadToS3(
+            path.join(ffmpegProccessedResponse.folder, file),
+            `chapters/${ffmpegProccessedResponse.lessonId}/${file}`,
+            file.endsWith(".m3u8")
+                ? "application/vnd.apple.mpegurl"
+                : "video/mp2t",
+        );
+        console.log(responseOfS3);
+    }
+    // const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
+    const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
     // console.log(uploadedVideoResponse);
-
-    if (!uploadedVideoResponse) {
-        throw new ApiError(500, "Some error occured during uploading video");
-    }
+    // if (!uploadedVideoResponse) {
+    //     throw new ApiError(500, "Some error occured during uploading video");
+    // }
 
     const newVideo = await Video.create({
-        title:
-            uploadedVideoResponse.title || "some title " + Math.random() * 1000,
-        url: uploadedVideoResponse.secure_url,
+        title: title || "some title " + Math.random() * 1000,
+        url: "some url",
         thumbnail: uploadedthumbnailResponse.secure_url,
-        duration: uploadedVideoResponse.duration,
+        duration: duration || 60,
         thumbnailDetails: uploadedthumbnailResponse,
-        videoDetails: uploadedVideoResponse,
+        videoDetails: {},
         owner: owner,
         isPublished: isPublished,
         description: description,
@@ -139,14 +140,32 @@ const videoUploader = asyncHandler(async (req, res) => {
     if (!newVideo) {
         throw new ApiError(500, "error occired during creating new video ");
     }
+
+    // https://techedu-videos.s3.eu-north-1.amazonaws.com/chapters/e76ed85b-5374-4612-a6eb-e1b67dbf2f90/index.m3u8
+    // https://techedu-videos.s3.eu-north-1.amazonaws.com/chapters/e76ed85b-5374-4612-a6eb-e1b67dbf2f90/segment000.ts
+    // https://techedu-videos.s3.eu-north-1.amazonaws.com/chapters/e76ed85b-5374-4612-a6eb-e1b67dbf2f90/segment001.ts
+
     // console.log(newVideo);
+
     console.log(`congratulation ${owner}, your video uploaded successfully`);
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(200, newVideo, "new video uploaded succcessfully"),
-        );
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                lessonId: lessonId,
+                playbackUrl: `https://${bucket}.s3.${region}.amazonaws.com/videos/${lessonId}/index.m3u8`,
+                newVideo,
+            },
+            "new video uploaded succcessfully",
+        ),
+    );
+
+    // return res
+    //     .status(200)
+    //     .json(
+    //         new ApiResponse(200, newVideo, "new video uploaded succcessfully"),
+    //     );
 });
 
 const updateRating = asyncHandler(async (req, res) => {

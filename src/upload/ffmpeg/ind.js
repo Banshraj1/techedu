@@ -60,8 +60,8 @@ app.get("/", (req, res) => {
 
 app.post("/upload", upload.single("file"), (req, res) => {
     const lessonId = uuidv4();
-    const videoPath = req.file.path;
-    const outputPath = `./uploads/cources/${lessonId}`;
+    const videoPath = req.file?.path;
+    const outputPath = `./uploads/courses/${lessonId}`;
     const hlsPath = `${outputPath}/index.m3u8`;
     console.log("hls path=>", hlsPath);
     if (!fs.existsSync(outputPath)) {
@@ -78,7 +78,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
         }
         console.log(`stdout: ${stdout}`);
         console.log(`stderr: ${stderr}`);
-        const videoUrl = `http:localhost:4000/uploads/cources/${lessonId}/index.m3u8`;
+        const videoUrl = `http:localhost:4000/uploads/courses/${lessonId}/index.m3u8`;
         res.json({
             message: "video converted successfully",
             videoUrl: videoUrl,

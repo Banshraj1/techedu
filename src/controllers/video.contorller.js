@@ -7,6 +7,7 @@ import { uploadToS3 } from "../utils/uploadToS3.js";
 import { ffmpegFxn } from "../upload/ffmpeg/index.js";
 import { error } from "console";
 import path from "path";
+import { getVideoMetadata } from "../upload/ffmpeg/getMetaData.js";
 // isme video upload and delete ka code hoga
 // rating change krne ka code hoga also likes and connent bhi yahi se mannage hoga
 
@@ -90,14 +91,20 @@ const videoUploader = asyncHandler(async (req, res) => {
     if (!owner) {
         throw new ApiError(400, "owner field is required");
     }
+
     const videoPath = req.files.video[0].path;
     const thumbnailPath = req.files.thumbnail[0].path;
-    // console.log(videoPath);
+    console.log(videoPath);
+    const videoMetadata = await getVideoMetadata(videoPath);
+    // console.log("video meta data=>",videoMetadata);
 
     if (!videoPath) {
         throw new ApiError(404, "video path not found");
     }
     const ffmpegProccessedResponse = await ffmpegFxn(videoPath);
+
+    // console.log("ffmpeg response=>",ffmpegProccessedResponse);
+
     if (!ffmpegProccessedResponse) {
         throw new ApiError(500, "failed to process ffmpeg");
     }
@@ -107,65 +114,71 @@ const videoUploader = asyncHandler(async (req, res) => {
         );
     }
     const files = fs.readdirSync(ffmpegProccessedResponse.folder);
+    // console.log("files\n");
     // console.log(files);
-
+    const folderStructure = "/chapters"; // TODO::GET PATH from admin where to store this video
     for (const file of files) {
         const responseOfS3 = await uploadToS3(
             path.join(ffmpegProccessedResponse.folder, file),
-            `chapters/${ffmpegProccessedResponse.lessonId}/${file}`,
+            `${folderStructure}/${ffmpegProccessedResponse.lessonId}/${file}`,
             file.endsWith(".m3u8")
                 ? "application/vnd.apple.mpegurl"
                 : "video/mp2t",
         );
-        console.log(responseOfS3);
+        // console.log("response => ", responseOfS3);
+        // if (!responseOfS3) {
+        //     throw new ApiError(
+        //         500,
+        //         "video.controller.js:::Some error occured during uploading video segments to asw S3",
+        //     );
+        // }
     }
     // const uploadedVideoResponse = await uploadOnCloudinary(videoPath);
+    console.log(thumbnailPath);
+
     const uploadedthumbnailResponse = await uploadOnCloudinary(thumbnailPath);
-    // console.log(uploadedVideoResponse);
-    // if (!uploadedVideoResponse) {
-    //     throw new ApiError(500, "Some error occured during uploading video");
-    // }
+    if (!uploadedthumbnailResponse) {
+        throw new ApiError(
+            500,
+            "video.controller.js:::Some error occured during uploading thumbnail to cloudinary",
+        );
+    }
+    // console.log("thumbnil response=>",uploadedthumbnailResponse);
 
     const newVideo = await Video.create({
         title: title || "some title " + Math.random() * 1000,
-        url: "some url",
-        thumbnail: uploadedthumbnailResponse.secure_url,
-        duration: duration || 60,
-        thumbnailDetails: uploadedthumbnailResponse,
-        videoDetails: {},
+        url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${folderStructure}/${ffmpegProccessedResponse.lessonId}/index.m3u8`,
+        thumbnail: uploadedthumbnailResponse.secure_url || {},
+        duration: videoMetadata.format.duration,
+        thumbnailDetails: {} || uploadedthumbnailResponse,
+        videoDetails: videoMetadata.format,
+        size: videoMetadata.format.size,
         owner: owner,
         isPublished: isPublished,
         description: description,
     });
     if (!newVideo) {
-        throw new ApiError(500, "error occired during creating new video ");
+        throw new ApiError(500, "error occured during creating new video ");
     }
-
-    // https://techedu-videos.s3.eu-north-1.amazonaws.com/chapters/e76ed85b-5374-4612-a6eb-e1b67dbf2f90/index.m3u8
-    // https://techedu-videos.s3.eu-north-1.amazonaws.com/chapters/e76ed85b-5374-4612-a6eb-e1b67dbf2f90/segment000.ts
-    // https://techedu-videos.s3.eu-north-1.amazonaws.com/chapters/e76ed85b-5374-4612-a6eb-e1b67dbf2f90/segment001.ts
-
-    // console.log(newVideo);
+    console.log("new video=>", newVideo);
 
     console.log(`congratulation ${owner}, your video uploaded successfully`);
-
+    console.log(
+        "ffmpegProccessedResponse for lesson id",
+        ffmpegProccessedResponse,
+    );
+    // yha tk sb thik hai 🙂
     return res.status(200).json(
         new ApiResponse(
             200,
             {
-                lessonId: lessonId,
-                playbackUrl: `https://${bucket}.s3.${region}.amazonaws.com/videos/${lessonId}/index.m3u8`,
+                lessonId: ffmpegProccessedResponse.lessonId,
+                playbackUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${folderStructure}/${ffmpegProccessedResponse.lessonId}/index.m3u8`,
                 newVideo,
             },
             "new video uploaded succcessfully",
         ),
     );
-
-    // return res
-    //     .status(200)
-    //     .json(
-    //         new ApiResponse(200, newVideo, "new video uploaded succcessfully"),
-    //     );
 });
 
 const updateRating = asyncHandler(async (req, res) => {

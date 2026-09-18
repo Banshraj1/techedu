@@ -10,19 +10,6 @@ app.use((req, res, next) => {
     console.log("Origin:", req.headers.origin);
     next();
 });
-
-app.use(
-    cors({
-        origin: [
-            "http://localhost:4000",
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "https://techedu-eta.vercel.app",
-            "https://techedu-frontend.vercel.app",
-        ],
-        credentials: true,
-    }),
-);
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
@@ -31,7 +18,18 @@ app.use((req, res, next) => {
     );
     next();
 });
-
+app.use(
+    cors({
+        origin:"http://localhost:5173",
+        credentials: true,
+    }),
+);
+// app.use(
+//     cors({
+//         origin: "http://localhost:5173",
+//         credentials: true,
+//     }),
+// );
 // app.use(cors());
 
 app.use(express.json({ limit: "16kb" }));

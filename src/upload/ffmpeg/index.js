@@ -37,6 +37,7 @@
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import { exec } from "child_process";
+import { log } from "console";
 
 function ffmpegFxn(videoPath) {
     return new Promise((resolve, reject) => {
@@ -72,6 +73,8 @@ function ffmpegFxn(videoPath) {
                 videoUrl: `http://localhost:4000/uploads/courses/${lessonId}/index.m3u8`,
                 lessonId,
             });
+            console.log("resolved");
+            
         });
     });
 }

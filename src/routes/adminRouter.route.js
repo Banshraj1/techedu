@@ -67,6 +67,7 @@ adminRouter
   .route("/p/delete/playlist")
   .delete(adminVerification, deletePlaylist);
 
+  // TODO blunder niche wala route ko user ke route me rahkna tha 
 adminRouter.route("/p/get/playlist/:playlistId").get(getPlaylistById); // no need of admin verification
 // upar tk sb thik hai
 

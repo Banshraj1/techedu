@@ -5,6 +5,8 @@ import { asyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { User } from "../model/user.model.js";
 import { trusted } from "mongoose";
 import jwt from "jsonwebtoken";
+import { sendWelcomeEmail } from "../email_verification/welcome.email.js";
+import { sendVerificationEmail } from "../email_verification/otpverification.email.js";
 // import { use } from "react";
 
 /*
@@ -40,10 +42,10 @@ const registerUser = asyncHandler(async (req, res) => {
         "-password",
     );
 
-    // console.log(alreadyRegisteredUser);
+    console.log(alreadyRegisteredUser);
     // console.log("email=",alreadyRegisteredUser.email);
 
-    if (alreadyRegisteredUser != false) {
+    if (alreadyRegisteredUser !== null) {
         console.log("User with this email already registered");
         throw new ApiError(
             400,
@@ -55,16 +57,25 @@ const registerUser = asyncHandler(async (req, res) => {
         //   message: "User with this email already exists",
         // });
     }
+    const verificationCode = Math.floor(
+        100000 + Math.random() * 900000,
+    ).toString();
+
     const newUser = await User.create({
         username: username,
         email: email,
         phone: phone,
         password: password,
+        verificationCode: verificationCode,
     });
 
     console.log(newUser);
 
-    const response = await User.findById(newUser._id).select("-password");
+    await sendVerificationEmail(email, verificationCode);
+
+    const response = await User.findById(newUser._id).select(
+        "-password -verificationCode",
+    );
 
     if (response == null) {
         throw new ApiError(501, "Something went wrong during user creation...");
@@ -77,6 +88,41 @@ const registerUser = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, response, "user created successfully"));
 });
+
+const verifyOTP = async (req, res) => {
+    try {
+        const { code } = req.body;
+
+        const user = await User.findOne({ verificationCode: code });
+
+        if (!user) {
+            return res
+                .status(400)
+                .json({ message: "Invalid verification code" });
+        }
+        user.OTPverified();
+        // console.log("User before saving:", user);
+
+        const welcomeEmailSent = await sendWelcomeEmail({
+            to: user.email,
+            name: user.username,
+        });
+        if (!welcomeEmailSent) {
+            console.error("Failed to send welcome email");
+            // You might want to handle this case differently, depending on your requirements
+        }
+        const response = await User.findById(user._id).select("-password ");
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(200, response, "Email verified successfully"),
+            );
+    } catch (error) {
+        console.error("Error in verifyEmail route:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
 
 const loginUser = asyncHandler(async (req, res) => {
     //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
@@ -96,7 +142,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const isPasswordCorrect = await loggedinUser.isPasswordCorrect(password);
     console.log(isPasswordCorrect);
-    
+
     if (!isPasswordCorrect) {
         throw new ApiError(402, "Invalid credentials...");
     }
@@ -306,4 +352,5 @@ export {
     getCurrentUser,
     expandWatchHistory,
     compressWatchHistory,
+    verifyOTP,
 };

@@ -1,13 +1,14 @@
 import { Router } from "express";
 import {
-  deleteUser,
-  loginUser,
-  logoutUser,
-  registerUser,
-  aboutUser,
-  getCurrentUser,
-  expandWatchHistory,
-  compressWatchHistory,
+    deleteUser,
+    loginUser,
+    logoutUser,
+    registerUser,
+    aboutUser,
+    getCurrentUser,
+    expandWatchHistory,
+    compressWatchHistory,
+    verifyOTP,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middleware/auth.middleware.js";
 const router = Router();
@@ -20,6 +21,8 @@ const router = Router();
 // })
 
 router.route("/register").post(registerUser);
+router.route("/verify").patch(verifyOTP);
+
 router.route("/login").post(loginUser);
 router.route("/logout").get(verifyJwt, logoutUser);
 router.route("/delete").post(verifyJwt, deleteUser);

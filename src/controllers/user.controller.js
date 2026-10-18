@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { asyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { User } from "../model/user.model.js";
+import { OTP } from "../model/otp.model.js";
 import { trusted } from "mongoose";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../email_verification/welcome.email.js";
@@ -14,6 +15,51 @@ is file me vo controller rahega jo user pr perform hoga jaise update details lik
 */
 
 // further to improve this add OTP feature also
+const getOTP = asyncHandler(async (req, res) => {
+    // ye wala function frontend se email lekr uspr otp send krwa dega
+    const { email } = req.body;
+    console.log("here");
+    
+    const alreadyRegisteredUser = await User.findOne({ email: email }).select(
+        "-password",
+    );
+
+    if (alreadyRegisteredUser !== null) {
+        console.log(
+            "User with this email already registered",
+            alreadyRegisteredUser,
+        );
+        throw new ApiError(
+            400,
+            "User with this email already registered",
+            alreadyRegisteredUser,
+        );
+    }
+
+    const verificationCode = Math.floor(
+        100000 + Math.random() * 900000,
+    ).toString();
+    // store this code and email in db
+
+    const otp = await OTP.create({
+        otp: verificationCode,
+        email: email,
+    });
+    // console.log(otp);
+    if (!otp) {
+        throw new ApiError(
+            501,
+            "Something went wrong during otp generating...",
+        );
+    }
+
+    const response = await sendVerificationEmail(email, verificationCode); // send otp on email
+    // console.log(response);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { success: true }, "otp send successfully"));
+});
 const registerUser = asyncHandler(async (req, res) => {
     /*
     to check if required fields are present
@@ -24,9 +70,6 @@ const registerUser = asyncHandler(async (req, res) => {
     return data after removing password from that
 
     */
-    // console.log(req);
-
-    //    console.log(req.body);
 
     const { username, email, phone = "1234567890", password } = req.body;
 
@@ -37,92 +80,82 @@ const registerUser = asyncHandler(async (req, res) => {
     //   throw new ApiError(404, "All fields are required");
     // }
     console.log(username, email, phone, password);
-    // .select("-password")
-    const alreadyRegisteredUser = await User.findOne({ email: email }).select(
-        "-password",
-    );
+    const isVerifiedUser = await OTP.findOne({ email: email }).select("-otp");
 
-    console.log(alreadyRegisteredUser);
-    // console.log("email=",alreadyRegisteredUser.email);
+    // console.log(verifiedUser);
 
-    if (alreadyRegisteredUser !== null) {
-        console.log("User with this email already registered");
+    if (isVerifiedUser === null) {
+        console.log(
+            "this email is not verified or verified before 30 minutes kindly restart again",
+        );
         throw new ApiError(
             400,
-            "User with this email already registered",
-            alreadyRegisteredUser,
+            "this email is not verified or verified before 30 minutes kindly restart again",
+            null,
         );
-        //   return res.status(409).json({
-        //   success: false,
-        //   message: "User with this email already exists",
-        // });
     }
-    const verificationCode = Math.floor(
-        100000 + Math.random() * 900000,
-    ).toString();
 
     const newUser = await User.create({
         username: username,
         email: email,
         phone: phone,
         password: password,
-        verificationCode: verificationCode,
     });
 
     console.log(newUser);
 
-    await sendVerificationEmail(email, verificationCode);
-
-    const response = await User.findById(newUser._id).select(
-        "-password -verificationCode",
-    );
+    const welcomeEmailSent = await sendWelcomeEmail({
+        to: newUser.email,
+        name: newUser.username,
+    });
+    if (!welcomeEmailSent) {
+        console.error("Failed to send welcome email");
+        // We might want to handle this case differently, depending on your requirements
+    }
+    const response = await User.findById(newUser._id).select("-password");
 
     if (response == null) {
         throw new ApiError(501, "Something went wrong during user creation...");
     }
-    // const result= response.body
-    // console.log(response.body);
-    console.log("User registered successfully");
+    // console.log("User registered successfully");
 
     return res
         .status(200)
         .json(new ApiResponse(200, response, "user created successfully"));
 });
 
-const verifyOTP = async (req, res) => {
-    try {
-        const { code } = req.body;
-
-        const user = await User.findOne({ verificationCode: code });
-
-        if (!user) {
-            return res
-                .status(400)
-                .json({ message: "Invalid verification code" });
-        }
-        user.OTPverified();
-        // console.log("User before saving:", user);
-
-        const welcomeEmailSent = await sendWelcomeEmail({
-            to: user.email,
-            name: user.username,
-        });
-        if (!welcomeEmailSent) {
-            console.error("Failed to send welcome email");
-            // You might want to handle this case differently, depending on your requirements
-        }
-        const response = await User.findById(user._id).select("-password ");
-
-        return res
-            .status(200)
-            .json(
-                new ApiResponse(200, response, "Email verified successfully"),
-            );
-    } catch (error) {
-        console.error("Error in verifyEmail route:", error);
-        res.status(500).send("Internal Server Error");
+const verifyOTP = asyncHandler(async (req, res) => {
+    const { code, email } = req.body;
+    console.log("here");
+    
+    const alreadyRegisteredUser = await User.findOne({ email: email }).select(
+        "-password",
+    );
+    if (alreadyRegisteredUser !== null) {
+        throw new ApiError(
+            405,
+            "user with this email already exists",
+            alreadyRegisteredUser,
+        );
     }
-};
+    const OTPResponse = await OTP.findOne({ otp: code });
+    if (OTPResponse === null) {
+        throw new ApiError(404, "Invalid otp ", {});
+    }
+    const isOTPcorrect = OTPResponse.isOTPCorrect(email);
+    if (!isOTPcorrect) {
+        throw new ApiError(404, "BAD REQUEST Invalid otp or email", {});
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                true,
+                "Email verified successfully otp was verified",
+            ),
+        );
+});
 
 const loginUser = asyncHandler(async (req, res) => {
     //abhi ke liye mai bs email se login kra rha hu baad me phone no se bhi hoga
@@ -353,4 +386,5 @@ export {
     expandWatchHistory,
     compressWatchHistory,
     verifyOTP,
+    getOTP,
 };

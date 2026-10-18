@@ -105,10 +105,10 @@ userSchema.methods.removeFromWatchHistory = function (videoId) {
     return this.save();
 };
 
-userSchema.methods.OTPverified = function () {
-    this.isVerified = true;
-    this.verificationCode = undefined;
-    return this.save();
-};
+// userSchema.methods.OTPverified = function () {
+//     this.isVerified = true;
+//     this.verificationCode = undefined;
+//     return this.save();
+// };
 
 export const User = mongoose.model("User", userSchema);

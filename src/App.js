@@ -21,8 +21,9 @@ app.use((req, res, next) => {
 app.use(
     cors({
         origin: [
-            "http://localhost:5173",
             "https://techedu-frontend.vercel.app",
+            "http://localhost:5173",
+            "https://techedu-eta.vercel.app",
         ],
         credentials: true,
     }),

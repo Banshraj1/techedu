@@ -18,12 +18,11 @@ is file me vo controller rahega jo user pr perform hoga jaise update details lik
 const getOTP = asyncHandler(async (req, res) => {
     // ye wala function frontend se email lekr uspr otp send krwa dega
     const { email } = req.body;
-    console.log("here");
     
     const alreadyRegisteredUser = await User.findOne({ email: email }).select(
         "-password",
     );
-
+    
     if (alreadyRegisteredUser !== null) {
         console.log(
             "User with this email already registered",
@@ -35,26 +34,28 @@ const getOTP = asyncHandler(async (req, res) => {
             alreadyRegisteredUser,
         );
     }
-
+    console.log("user already not registered");
+    
     const verificationCode = Math.floor(
         100000 + Math.random() * 900000,
     ).toString();
     // store this code and email in db
-
+    
     const otp = await OTP.create({
         otp: verificationCode,
         email: email,
     });
-    // console.log(otp);
+    console.log("otp=",otp);
     if (!otp) {
         throw new ApiError(
             501,
             "Something went wrong during otp generating...",
         );
     }
+    console.log("here otp created");
 
     const response = await sendVerificationEmail(email, verificationCode); // send otp on email
-    // console.log(response);
+    console.log("email send");
 
     return res
         .status(200)

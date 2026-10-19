@@ -22,7 +22,7 @@ const router = Router();
 // })
 
 router.route("/register").post(registerUser);
-router.route("/veriftOTP").patch(verifyOTP);
+router.route("/verifyOTP").post(verifyOTP);
 router.route("/getOTP").post(getOTP);
 router.route("/login").post(loginUser);
 router.route("/logout").get(verifyJwt, logoutUser);

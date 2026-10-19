@@ -1,14 +1,13 @@
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-dotenv.config();
-import { transporter } from "./email.config.js";
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+// dotenv.config();
+import { transporter,SMTP2GOtransporter } from "./email.config.js";
 
 export const sendmail = async ({to, subject, text, html}) => {
     try {
-        console.log("SMTP_USER:", process.env.SMTP_USER);
-        console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
-        const response = await transporter.sendMail({
-            from: '"Techedu" <prajapatibanshraj57@gmail.com>', // sender address
+        console.log("send.email.js file in use");
+        const response = await SMTP2GOtransporter.sendMail({
+            from: '"Techedu" <banshraj_ug_24@ei.nits.ac.in>', // sender address
             to: to, // list of recipients
             subject: subject, // subject line
             text: text, // plain text body
@@ -21,5 +20,6 @@ export const sendmail = async ({to, subject, text, html}) => {
         return response;
     } catch (err) {
         console.error("Error while sending mail:", err);
+        throw err
     }
 };

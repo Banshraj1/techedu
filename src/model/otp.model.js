@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 import { MAX } from "uuid";
 const otpSchema = new mongoose.Schema(
     {
@@ -14,6 +15,7 @@ const otpSchema = new mongoose.Schema(
     },
     { timestamps: true },
 );
+otpSchema.index({ createdAt: 1 }, { expireAfterSeconds: 600 });
 otpSchema.methods.isOTPCorrect = async function (email) {
     return this.email == email;
 };

@@ -132,6 +132,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
     const alreadyRegisteredUser = await User.findOne({ email: email }).select(
         "-password",
     );
+
     if (alreadyRegisteredUser !== null) {
         throw new ApiError(
             405,
@@ -139,9 +140,21 @@ const verifyOTP = asyncHandler(async (req, res) => {
             alreadyRegisteredUser,
         );
     }
+
     const OTPResponse = await OTP.findOne({ otp: code });
     if (OTPResponse === null) {
         throw new ApiError(404, "Invalid otp ", {});
+    }
+    const diff = Date.now() - new Date(OTPResponse.createdAt).getTime();
+    console.log(OTPResponse);
+
+    console.log(Date.now());
+    console.log(OTPResponse.createdAt);
+
+    console.log("diffrence=", diff);
+    if (diff > 10 * 60 * 1000) {
+        console.log("otp expired");
+        throw new ApiError(405, "OTP EXPIRED");
     }
     const isOTPcorrect = OTPResponse.isOTPCorrect(email);
     if (!isOTPcorrect) {
@@ -302,7 +315,7 @@ const aboutUser = asyncHandler(async (req, res) => {
 
 const getCurrentUser = asyncHandler(async (req, res) => {
     console.log("get curr user hit");
-    
+
     const user = req.user;
     console.log("user", user);
 

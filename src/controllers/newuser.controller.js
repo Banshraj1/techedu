@@ -131,6 +131,14 @@ const verifyOTP = asyncHandler(async (req, res) => {
         );
     }
     const OTPResponse = await OTP.findOne({ otp: code });
+    const diff = Date.now() - OTPResponse.createdAt;
+    console.log(OTPResponse);
+    
+    console.log("diffrence=",diff);
+    if (diff > 600) {
+        
+        console.log("otp expired");
+    }
     if (OTPResponse === null) {
         throw new ApiError(404, "Invalid otp ", {});
     }

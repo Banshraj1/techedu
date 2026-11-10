@@ -12,6 +12,7 @@ import {
     getOTP,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middleware/auth.middleware.js";
+import { authLimit } from "../middleware/ratelimit.middleware.js";
 const router = Router();
 
 // console.log(registerUser);
@@ -21,8 +22,8 @@ const router = Router();
 //     res.send("Hello ")
 // })
 
-router.route("/register").post(registerUser);
-router.route("/verifyOTP").post(verifyOTP);
+router.route("/register").post(authLimit, registerUser);
+router.route("/verifyOTP").post(authLimit, verifyOTP);
 router.route("/getOTP").post(getOTP);
 router.route("/login").post(loginUser);
 router.route("/logout").get(verifyJwt, logoutUser);

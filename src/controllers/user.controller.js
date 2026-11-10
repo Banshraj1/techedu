@@ -18,11 +18,11 @@ is file me vo controller rahega jo user pr perform hoga jaise update details lik
 const getOTP = asyncHandler(async (req, res) => {
     // ye wala function frontend se email lekr uspr otp send krwa dega
     const { email } = req.body;
-    
+
     const alreadyRegisteredUser = await User.findOne({ email: email }).select(
         "-password",
     );
-    
+
     if (alreadyRegisteredUser !== null) {
         console.log(
             "User with this email already registered",
@@ -35,17 +35,17 @@ const getOTP = asyncHandler(async (req, res) => {
         );
     }
     console.log("user already not registered");
-    
+
     const verificationCode = Math.floor(
         100000 + Math.random() * 900000,
     ).toString();
     // store this code and email in db
-    
+
     const otp = await OTP.create({
         otp: verificationCode,
         email: email,
     });
-    console.log("otp=",otp);
+    console.log("otp=", otp);
     if (!otp) {
         throw new ApiError(
             501,
@@ -128,7 +128,7 @@ const registerUser = asyncHandler(async (req, res) => {
 const verifyOTP = asyncHandler(async (req, res) => {
     const { code, email } = req.body;
     console.log("here");
-    
+
     const alreadyRegisteredUser = await User.findOne({ email: email }).select(
         "-password",
     );
@@ -301,7 +301,11 @@ const aboutUser = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+    console.log("get curr user hit");
+    
     const user = req.user;
+    console.log("user", user);
+
     if (!user) {
         console.log("user not found");
         throw new ApiError(404, "unauthorised access");

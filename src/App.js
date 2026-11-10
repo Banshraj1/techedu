@@ -7,7 +7,7 @@ const port = process.env.port;
 const app = express();
 
 app.use((req, res, next) => {
-    console.log("Origin:", req.headers.origin);
+    // console.log("Origin:", req.headers.origin);
     next();
 });
 app.use((req, res, next) => {

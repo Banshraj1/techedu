@@ -1,8 +1,8 @@
 const asyncHandler = (fxn) => async (req, res, next) => {
   try {
     return await fxn(req, res, next);
-  } catch (error) {
-    res.status(error.statusCode || 500).json({
+  } catch (error) {    
+    res.status(error.statuscode || 500).json({
         success: false,
         message: error.message || "Some error occured",
     });
